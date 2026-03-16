@@ -1,0 +1,34 @@
+{
+  "oobo_version": "0.1.6",
+  "commit_hash": "4511e69d99e3a3f5bdf066abb76a2f0364b54215",
+  "branch": "main",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "human",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    }
+  ],
+  "committed_at": 1773643970,
+  "message": "chore: screenshot added",
+  "files_changed": [
+    "screenshot.png"
+  ],
+  "added": 0,
+  "deleted": 0,
+  "file_changes": [
+    {
+      "path": "screenshot.png",
+      "added": 0,
+      "deleted": 0,
+      "attribution": "human"
+    }
+  ],
+  "ai_added": 0,
+  "ai_deleted": 0,
+  "human_added": 0,
+  "human_deleted": 0,
+  "session_ids": [],
+  "transparency_mode": "on"
+}
