@@ -21,7 +21,7 @@ describe("GET /api/anchors/verify", () => {
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(body).toEqual({ email: "admin" });
+    expect(body).toEqual({ valid: true });
   });
 
   it("returns 401 with invalid API key", async () => {
