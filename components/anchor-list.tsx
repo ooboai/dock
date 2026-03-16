@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableHeader,
@@ -97,9 +97,8 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
           </TableHeader>
           <TableBody>
             {anchors.map((anchor) => (
-              <>
+              <React.Fragment key={anchor.id}>
                 <TableRow
-                  key={anchor.id}
                   className="cursor-pointer"
                   onClick={() => setExpandedId(expandedId === anchor.id ? null : anchor.id)}
                 >
@@ -135,7 +134,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                     </TableCell>
                   </TableRow>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
