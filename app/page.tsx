@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
