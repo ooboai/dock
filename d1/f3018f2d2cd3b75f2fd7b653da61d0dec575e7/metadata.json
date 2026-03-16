@@ -1,0 +1,35 @@
+{
+  "oobo_version": "0.1.6",
+  "commit_hash": "d1f3018f2d2cd3b75f2fd7b653da61d0dec575e7",
+  "branch": "main",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    }
+  ],
+  "committed_at": 1773643439,
+  "message": "fix: move React key to Fragment wrapper in anchor list map",
+  "files_changed": [
+    "components/anchor-list.tsx"
+  ],
+  "added": 3,
+  "deleted": 4,
+  "file_changes": [
+    {
+      "path": "components/anchor-list.tsx",
+      "added": 3,
+      "deleted": 4,
+      "attribution": "ai"
+    }
+  ],
+  "ai_added": 3,
+  "ai_deleted": 4,
+  "human_added": 0,
+  "human_deleted": 0,
+  "ai_percentage": 100.0,
+  "session_ids": [],
+  "transparency_mode": "on"
+}
