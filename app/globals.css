@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-oobo-primary: #1F4F6D;
+  --color-oobo-secondary: #5F7F84;
+  --color-oobo-highlight: #7DD3E8;
+  --color-oobo-teal: #14b8a6;
+  --color-oobo-teal-dark: #0d9488;
+  --color-oobo-cyan: #0ea5e9;
+  --color-oobo-dark: #111111;
+  --color-oobo-green: #10b981;
+  --color-oobo-red: #ef4444;
+  --color-oobo-yellow: #f59e0b;
+  --color-oobo-link: #0284c7;
+  --color-oobo-muted: #6b7280;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #f8fafb;
+  --foreground: #1F4F6D;
+  --card: #ffffff;
+  --card-foreground: #1F4F6D;
+  --popover: #ffffff;
+  --popover-foreground: #1F4F6D;
+  --primary: #1F4F6D;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f4f5;
+  --secondary-foreground: #5F7F84;
+  --muted: #f0f4f5;
+  --muted-foreground: #5F7F84;
+  --accent: #f0f4f5;
+  --accent-foreground: #1F4F6D;
+  --destructive: #ef4444;
+  --border: #D9E3E1;
+  --input: #D9E3E1;
+  --ring: #7DD3E8;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}

@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Anchor {
+  id           String      @id @default(cuid())
+  commitHash   String
+  gitRemote    String      @default("")
+  branch       String?
+  author       String?
+  authorType   String?
+  message      String?
+  aiPercentage Float?
+  added        Int         @default(0)
+  deleted      Int         @default(0)
+  aiAdded      Int         @default(0)
+  aiDeleted    Int         @default(0)
+  committedAt  DateTime?
+  payload      Json
+  createdAt    DateTime    @default(now())
+  transcript   Transcript?
+
+  @@unique([gitRemote, commitHash])
+  @@index([committedAt])
+  @@index([authorType])
+  @@index([branch])
+}
+
+model Transcript {
+  id        String   @id @default(cuid())
+  anchorId  String   @unique
+  anchor    Anchor   @relation(fields: [anchorId], references: [id], onDelete: Cascade)
+  messages  Json
+  createdAt DateTime @default(now())
+}
