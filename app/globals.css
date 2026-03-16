@@ -74,4 +74,14 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
+  a,
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  select,
+  summary {
+    cursor: pointer;
+  }
 }
