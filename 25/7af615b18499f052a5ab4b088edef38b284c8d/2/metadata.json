@@ -1,0 +1,10 @@
+{
+  "session_id": "48120677-169c-413f-8cb1-e7c4bdf41db4",
+  "agent": "composer",
+  "link_type": "explicit",
+  "files_touched": [
+    "app/globals.css"
+  ],
+  "is_subagent": false,
+  "is_estimated": false
+}
