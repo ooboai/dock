@@ -15,6 +15,7 @@ import { AiPercentageBar } from "@/components/ai-percentage-bar";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import { AnchorDetail } from "@/components/anchor-detail";
 import type { TranscriptMessage } from "@/lib/types";
+import { timeAgo, formatFullDate } from "@/lib/utils";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface AnchorRow {
@@ -42,18 +43,6 @@ interface AnchorListProps {
   pagination: Pagination;
   onPageChange: (page: number) => void;
   loading: boolean;
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function AnchorList({ anchors, pagination, onPageChange, loading }: AnchorListProps) {
@@ -115,7 +104,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                   <TableCell>
                     <code className="text-xs rounded bg-muted px-1.5 py-0.5">{anchor.branch ?? "—"}</code>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{formatDate(anchor.committedAt)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground" title={formatFullDate(anchor.committedAt)}>{timeAgo(anchor.committedAt)}</TableCell>
                   <TableCell>
                     <ChevronDown
                       className={`h-4 w-4 text-muted-foreground transition-transform ${expandedId === anchor.id ? "rotate-180" : ""}`}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import type { TranscriptMessage } from "@/lib/types";
@@ -101,15 +102,24 @@ function formatDuration(ms: number): string {
   return `${Math.floor(secs / 60)}m ${secs % 60}s`;
 }
 
-function TranscriptMessageLine({ m }: { m: TranscriptMessage }) {
+function TranscriptMessageLine({ m, expanded }: { m: TranscriptMessage; expanded: boolean }) {
+  const maxLen = expanded ? 500 : 200;
+  const timestamp = m.timestamp_ms
+    ? new Date(m.timestamp_ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : null;
+
   if (m.tool_call) {
     const name = m.tool_call.name ?? "unknown";
     const summary = m.tool_call.input_summary ?? "";
+    const summaryMax = expanded ? 300 : 120;
     return (
-      <div className="text-sm font-mono">
-        <span className="text-muted-foreground">→</span>{" "}
-        <span className="text-oobo-cyan">{name}</span>
-        {summary && <span className="text-muted-foreground">({summary.slice(0, 120)}{summary.length > 120 ? "…" : ""})</span>}
+      <div className="flex items-start gap-2 py-1 px-2 rounded bg-oobo-cyan/5 font-mono text-xs">
+        <span className="text-oobo-cyan shrink-0 mt-0.5">→</span>
+        <div className="min-w-0 flex-1">
+          <span className="font-semibold text-oobo-cyan">{name}</span>
+          {summary && <span className="text-muted-foreground ml-1">({summary.slice(0, summaryMax)}{summary.length > summaryMax ? "…" : ""})</span>}
+        </div>
+        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
       </div>
     );
   }
@@ -118,38 +128,89 @@ function TranscriptMessageLine({ m }: { m: TranscriptMessage }) {
     const name = m.tool_result.name ?? "unknown";
     const succeeded = m.tool_result.success === true;
     return (
-      <div className="text-sm font-mono">
-        <span className="text-muted-foreground">←</span>{" "}
-        <span className={succeeded ? "text-oobo-teal" : "text-oobo-red"}>{name}</span>
-        <span className="text-muted-foreground">: {succeeded ? "ok" : "failed"}</span>
-        {m.tool_result.output_summary && (
-          <span className="text-muted-foreground"> — {m.tool_result.output_summary.slice(0, 100)}{m.tool_result.output_summary.length > 100 ? "…" : ""}</span>
-        )}
+      <div className={`flex items-start gap-2 py-1 px-2 rounded font-mono text-xs ${succeeded ? "bg-oobo-teal/5" : "bg-oobo-red/5"}`}>
+        <span className={`shrink-0 mt-0.5 ${succeeded ? "text-oobo-teal" : "text-oobo-red"}`}>←</span>
+        <div className="min-w-0 flex-1">
+          <span className={`font-semibold ${succeeded ? "text-oobo-teal" : "text-oobo-red"}`}>{name}</span>
+          <span className="text-muted-foreground ml-1">{succeeded ? "ok" : "failed"}</span>
+          {m.tool_result.output_summary && (
+            <span className="text-muted-foreground"> — {m.tool_result.output_summary.slice(0, maxLen)}{m.tool_result.output_summary.length > maxLen ? "…" : ""}</span>
+          )}
+        </div>
+        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
       </div>
     );
   }
 
   if (m.thinking) {
     return (
-      <div className="text-sm">
-        <span className="text-xs font-medium text-muted-foreground italic">thinking:</span>{" "}
-        <span className="text-muted-foreground italic">{m.thinking.slice(0, 200)}{m.thinking.length > 200 ? "…" : ""}</span>
+      <div className="flex items-start gap-2 py-1 px-2 rounded bg-purple-500/5 text-xs">
+        <span className="text-purple-400 shrink-0 mt-0.5 italic">💭</span>
+        <span className="text-muted-foreground italic min-w-0 flex-1">{m.thinking.slice(0, maxLen)}{m.thinking.length > maxLen ? "…" : ""}</span>
+        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
       </div>
     );
   }
 
   if (m.text) {
+    const isAssistant = m.role === "assistant";
     return (
-      <div className="text-sm">
-        <span className={`font-medium ${m.role === "assistant" ? "text-oobo-cyan" : "text-oobo-teal"}`}>
-          {m.role}:
-        </span>{" "}
-        <span className="text-muted-foreground">{m.text.slice(0, 200)}{m.text.length > 200 ? "…" : ""}</span>
+      <div className="flex items-start gap-2 py-1.5 px-2 text-sm">
+        <span className={`text-xs font-semibold shrink-0 mt-0.5 w-16 ${isAssistant ? "text-oobo-cyan" : "text-oobo-teal"}`}>
+          {m.role}
+        </span>
+        <span className="text-foreground/80 min-w-0 flex-1">{m.text.slice(0, maxLen)}{m.text.length > maxLen ? "…" : ""}</span>
+        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
       </div>
     );
   }
 
   return null;
+}
+
+function transcriptStats(messages: TranscriptMessage[]) {
+  let text = 0, toolCalls = 0, toolResults = 0, thinking = 0;
+  for (const m of messages) {
+    if (m.tool_call) toolCalls++;
+    else if (m.tool_result) toolResults++;
+    else if (m.thinking) thinking++;
+    else if (m.text) text++;
+  }
+  return { text, toolCalls, toolResults, thinking, total: messages.length };
+}
+
+function TranscriptSection({ messages }: { messages: TranscriptMessage[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const stats = transcriptStats(messages);
+  const previewCount = 5;
+  const shown = expanded ? messages : messages.slice(0, previewCount);
+  const hasMore = messages.length > previewCount;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-heading font-semibold">Transcript</h4>
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <span>{stats.text} message{stats.text !== 1 ? "s" : ""}</span>
+          {stats.toolCalls > 0 && <span>· {stats.toolCalls} tool call{stats.toolCalls !== 1 ? "s" : ""}</span>}
+          {stats.thinking > 0 && <span>· {stats.thinking} thinking</span>}
+        </div>
+      </div>
+      <div className={`space-y-0.5 rounded-lg border bg-background/50 p-1.5 ${expanded ? "max-h-128" : "max-h-64"} overflow-y-auto`}>
+        {shown.filter((m) => m.text || m.tool_call || m.tool_result || m.thinking).map((m, i) => (
+          <TranscriptMessageLine key={i} m={m} expanded={expanded} />
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-1.5 text-xs text-oobo-cyan hover:text-oobo-cyan/80 transition-colors"
+        >
+          {expanded ? "Show less" : `Show all ${messages.length} messages`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: AnchorDetailProps) {
@@ -236,20 +297,10 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
         </div>
       )}
 
-      {/* Transcript Preview */}
+      {/* Transcript */}
       {/* TODO: Add per-session transcript view using payload.session_transcripts when available */}
       {hasTranscript && transcriptMessages && transcriptMessages.length > 0 && (
-        <div>
-          <h4 className="text-sm font-heading font-semibold mb-2">Transcript Preview</h4>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
-            {transcriptMessages.slice(0, 8).map((m, i) => (
-              <TranscriptMessageLine key={i} m={m} />
-            ))}
-            {transcriptMessages.length > 8 && (
-              <p className="text-xs text-muted-foreground">+{transcriptMessages.length - 8} more messages</p>
-            )}
-          </div>
-        </div>
+        <TranscriptSection messages={transcriptMessages} />
       )}
     </div>
   );
