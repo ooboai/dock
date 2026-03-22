@@ -1,0 +1,42 @@
+{
+  "session_id": "a4bc4563-3c83-478b-91f4-c6c7d0bf74e5",
+  "agent": "cursor",
+  "model": "claude-4.6-opus-high-thinking",
+  "link_type": "explicit",
+  "duration_secs": 5038,
+  "tool_calls": 96,
+  "files_touched": [
+    "prisma/migrations/20260322_add_session_transcripts/migration.sql",
+    "tsconfig.json",
+    "lib/types.ts",
+    "components/anchor-list.tsx",
+    "app/api/anchors/ingest/route.ts",
+    "app/api/anchors/route.ts",
+    "components/anchor-detail.tsx",
+    "__tests__/api/ingest.test.ts",
+    "prisma/schema.prisma"
+  ],
+  "tool_usage": {
+    "Write": 39,
+    "Shell": 11,
+    "Read": 8
+  },
+  "tool_failures": 2,
+  "subagent_count": 1,
+  "bash_commands": [
+    "cd /Users/teddy/dev/projects/oobo/dock && npx prisma migrate dev --name add-session-transcripts 2>&1",
+    "mkdir -p /Users/teddy/dev/projects/oobo/dock/prisma/migrations/20260322_add_session_transcripts",
+    "cd /Users/teddy/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd /Users/teddy/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd /Users/teddy/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd /Users/teddy/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd /Users/teddy/dev/projects/oobo/dock && git status",
+    "cd /Users/teddy/dev/projects/oobo/dock && git diff --stat HEAD",
+    "cd /Users/teddy/dev/projects/oobo/dock && git log --oneline -5",
+    "cd /Users/teddy/dev/projects/oobo/dock && git diff HEAD -- tsconfig.json",
+    "cd /Users/teddy/dev/projects/oobo/dock && git checkout -- tsconfig.json"
+  ],
+  "thinking_duration_ms": 138985,
+  "is_subagent": false,
+  "is_estimated": false
+}

@@ -1,0 +1,50 @@
+{
+  "oobo_version": "0.1.7",
+  "commit_hash": "43a71f8a8a372490521ab9449507f0e4904d064b",
+  "branch": "HEAD",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    },
+    {
+      "name": "cursor",
+      "role": "agent",
+      "model": "claude-4.6-opus-high-thinking"
+    }
+  ],
+  "committed_at": 1773684845,
+  "message": "oobo: add anchor for a1/1c499100b4d53537b8f9b58500bf105876b835/metadata.json",
+  "files_changed": [
+    "a1/1c499100b4d53537b8f9b58500bf105876b835/1/metadata.json",
+    "a1/1c499100b4d53537b8f9b58500bf105876b835/metadata.json"
+  ],
+  "added": 82,
+  "deleted": 0,
+  "file_changes": [
+    {
+      "path": "a1/1c499100b4d53537b8f9b58500bf105876b835/1/metadata.json",
+      "added": 15,
+      "deleted": 0,
+      "attribution": "human"
+    },
+    {
+      "path": "a1/1c499100b4d53537b8f9b58500bf105876b835/metadata.json",
+      "added": 67,
+      "deleted": 0,
+      "attribution": "human"
+    }
+  ],
+  "ai_added": 0,
+  "ai_deleted": 0,
+  "human_added": 82,
+  "human_deleted": 0,
+  "ai_percentage": 0.0,
+  "session_ids": [
+    "1737e8d7-ab20-46af-99c0-45689c546cd9",
+    "0a2948c8-8859-4e93-9303-bc35204a61f1"
+  ],
+  "transparency_mode": "off"
+}

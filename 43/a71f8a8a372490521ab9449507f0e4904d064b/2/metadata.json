@@ -1,0 +1,15 @@
+{
+  "session_id": "0a2948c8-8859-4e93-9303-bc35204a61f1",
+  "agent": "cursor",
+  "model": "claude-4.6-opus-high-thinking",
+  "link_type": "explicit",
+  "duration_secs": 792,
+  "files_touched": [
+    "prisma/migrations/migration_lock.toml",
+    "package.json",
+    "prisma/migrations/20260316_init/migration.sql",
+    "app/page.tsx"
+  ],
+  "is_subagent": false,
+  "is_estimated": false
+}

@@ -1,0 +1,67 @@
+{
+  "oobo_version": "0.1.7",
+  "commit_hash": "a11c499100b4d53537b8f9b58500bf105876b835",
+  "branch": "1-error-deploy-on-vercel",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    },
+    {
+      "name": "cursor",
+      "role": "agent",
+      "model": "claude-4.6-opus-high-thinking"
+    }
+  ],
+  "committed_at": 1773684296,
+  "message": "fix: resolve Vercel deploy failures - pass null to useRef, add Prisma migration, run migrate deploy in build",
+  "files_changed": [
+    "app/page.tsx",
+    "package.json",
+    "prisma/migrations/20260316_init/migration.sql",
+    "prisma/migrations/migration_lock.toml"
+  ],
+  "added": 53,
+  "deleted": 2,
+  "file_changes": [
+    {
+      "path": "app/page.tsx",
+      "added": 1,
+      "deleted": 1,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "package.json",
+      "added": 1,
+      "deleted": 1,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "prisma/migrations/20260316_init/migration.sql",
+      "added": 48,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "prisma/migrations/migration_lock.toml",
+      "added": 3,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    }
+  ],
+  "ai_added": 53,
+  "ai_deleted": 2,
+  "human_added": 0,
+  "human_deleted": 0,
+  "ai_percentage": 100.0,
+  "session_ids": [
+    "1737e8d7-ab20-46af-99c0-45689c546cd9"
+  ],
+  "transparency_mode": "off"
+}
