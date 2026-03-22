@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
+import { ChevronRight } from "lucide-react";
 
 interface AnchorPayload {
   anchor?: {
@@ -51,43 +53,20 @@ interface AnchorDetailProps {
   committedAt?: string | null;
 }
 
-function AttributionBadge({ attribution }: { attribution: string }) {
-  const styles: Record<string, string> = {
-    ai: "bg-accent text-accent-foreground border-border",
-    human: "bg-muted text-muted-foreground border-border",
-    mixed: "bg-muted text-foreground border-border",
-  };
-  return (
-    <Badge variant="outline" className={`text-[10px] ${styles[attribution] ?? ""}`}>
-      {attribution}
-    </Badge>
-  );
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
 }
 
-function FileRoleBadge({ role }: { role: "writer" | "reader" | "both" }) {
-  const labels: Record<string, string> = {
-    writer: "write",
-    reader: "read",
-    both: "read+write",
-  };
-  return (
-    <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border">
-      {labels[role] ?? role}
-    </Badge>
-  );
-}
-
-function formatToolUsage(usage: Record<string, number>): string {
-  return Object.entries(usage)
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, count]) => `${name}: ${count}`)
-    .join(" · ");
-}
-
-function formatDuration(ms: number): string {
-  const secs = Math.round(ms / 1000);
+function formatDurationSecs(secs: number): string {
   if (secs < 60) return `${secs}s`;
-  return `${Math.floor(secs / 60)}m ${secs % 60}s`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ${secs % 60}s`;
+  return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m`;
+}
+
+function formatDurationMs(ms: number): string {
+  return formatDurationSecs(Math.round(ms / 1000));
 }
 
 function formatFullDate(dateStr: string | null | undefined): string {
@@ -102,53 +81,136 @@ function formatFullDate(dateStr: string | null | undefined): string {
   });
 }
 
+function AttributionBadge({ attribution }: { attribution: string }) {
+  const styles: Record<string, string> = {
+    ai: "bg-accent text-accent-foreground border-border",
+    human: "bg-muted text-muted-foreground border-border",
+    mixed: "bg-muted text-foreground border-border",
+  };
+  return (
+    <Badge variant="outline" className={`text-[10px] ${styles[attribution] ?? ""}`}>
+      {attribution}
+    </Badge>
+  );
+}
+
+function FileRoleBadge({ role }: { role: "writer" | "reader" | "both" }) {
+  const labels: Record<string, string> = { writer: "write", reader: "read", both: "read+write" };
+  return (
+    <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border">
+      {labels[role] ?? role}
+    </Badge>
+  );
+}
+
+type SessionEntry = NonNullable<NonNullable<AnchorPayload["anchor"]>["sessions"]>[number];
+
+function aggregateStats(sessions: SessionEntry[]) {
+  let inputTokens = 0, outputTokens = 0, toolCalls = 0, toolFailures = 0;
+  let duration = 0, thinkingMs = 0, subagents = 0;
+  const models = new Set<string>();
+  const agents = new Set<string>();
+  const toolUsage: Record<string, number> = {};
+
+  for (const s of sessions) {
+    inputTokens += s.input_tokens ?? 0;
+    outputTokens += s.output_tokens ?? 0;
+    toolCalls += s.tool_calls ?? 0;
+    toolFailures += s.tool_failures ?? 0;
+    duration += s.duration_secs ?? 0;
+    thinkingMs += s.thinking_duration_ms ?? 0;
+    subagents += s.subagent_count ?? 0;
+    if (s.model) models.add(s.model);
+    if (s.agent) agents.add(s.agent);
+    if (s.tool_usage) {
+      for (const [name, count] of Object.entries(s.tool_usage)) {
+        toolUsage[name] = (toolUsage[name] ?? 0) + count;
+      }
+    }
+  }
+
+  return {
+    inputTokens, outputTokens, totalTokens: inputTokens + outputTokens,
+    toolCalls, toolFailures, duration, thinkingMs, subagents,
+    models: [...models], agents: [...agents], toolUsage,
+    sessionCount: sessions.length,
+  };
+}
+
 export function AnchorDetail({ payload, committedAt }: AnchorDetailProps) {
   const anchor = payload.anchor;
   if (!anchor) return null;
 
   const allSessions = anchor.sessions ?? [];
+  const stats = aggregateStats(allSessions);
   const rootSessions = allSessions.filter((s) => !s.is_subagent);
   const subagentSessions = allSessions.filter((s) => s.is_subagent);
+  const toolUsageEntries = Object.entries(stats.toolUsage).sort(([, a], [, b]) => b - a);
 
   return (
     <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
-      {/* Full date */}
-      {committedAt && (
-        <p className="text-xs text-muted-foreground/60">{formatFullDate(committedAt)}</p>
-      )}
-
-      {/* Contributors */}
-      {anchor.contributors && anchor.contributors.length > 0 && (
-        <div>
-          <h4 className="text-sm font-heading font-semibold mb-2">Contributors</h4>
-          <div className="flex flex-wrap gap-2">
+      {/* Date + Contributors (compact row) */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {committedAt && (
+          <span className="text-xs text-muted-foreground/60">{formatFullDate(committedAt)}</span>
+        )}
+        {anchor.contributors && anchor.contributors.length > 0 && (
+          <>
+            <span className="text-xs text-muted-foreground/40">·</span>
             {anchor.contributors.map((c, i) => (
-              <div key={i} className="flex items-center gap-1.5 rounded-md bg-background border px-2.5 py-1.5 text-sm">
+              <div key={i} className="flex items-center gap-1 text-xs">
                 <span>{c.name}</span>
                 <AuthorTypeBadge type={c.role === "agent" ? "agent" : "human"} />
-                {c.model && <span className="text-xs text-muted-foreground">({c.model})</span>}
+                {c.model && <span className="text-muted-foreground">({c.model})</span>}
               </div>
             ))}
+          </>
+        )}
+      </div>
+
+      {/* AI Summary Stats */}
+      {allSessions.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCell label="Tokens" value={formatNumber(stats.totalTokens)} sub={`${formatNumber(stats.inputTokens)} in · ${formatNumber(stats.outputTokens)} out`} />
+          {stats.duration > 0 && <StatCell label="Duration" value={formatDurationSecs(stats.duration)} />}
+          {stats.toolCalls > 0 && <StatCell label="Tool Calls" value={stats.toolCalls.toLocaleString()} sub={stats.toolFailures > 0 ? `${stats.toolFailures} failed` : undefined} />}
+          {stats.thinkingMs > 0 && <StatCell label="Thinking" value={formatDurationMs(stats.thinkingMs)} />}
+          {stats.models.length > 0 && <StatCell label={stats.models.length === 1 ? "Model" : "Models"} value={stats.models.join(", ")} />}
+          {stats.agents.length > 0 && <StatCell label={stats.agents.length === 1 ? "Agent" : "Agents"} value={stats.agents.join(", ")} />}
+          {stats.subagents > 0 && <StatCell label="Subagents" value={stats.subagents.toLocaleString()} />}
+          {stats.sessionCount > 1 && <StatCell label="Sessions" value={stats.sessionCount.toLocaleString()} />}
+        </div>
+      )}
+
+      {/* Tool Usage Breakdown */}
+      {toolUsageEntries.length > 0 && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {toolUsageEntries.map(([name, count]) => (
+            <span key={name}>{name} <span className="font-medium text-foreground/70">{count}</span></span>
+          ))}
+        </div>
+      )}
+
+      {/* Sessions (when multiple, show per-session breakdown) */}
+      {allSessions.length > 1 && (
+        <div>
+          <h4 className="text-sm font-heading font-semibold mb-2">Sessions</h4>
+          <div className="space-y-2">
+            {rootSessions.map((s, i) => (
+              <SessionCard key={i} session={s} allSubagents={subagentSessions} depth={0} />
+            ))}
+            {subagentSessions
+              .filter((sub) => !allSessions.some((r) => r.session_id === sub.parent_session_id))
+              .map((s, i) => (
+                <SessionCard key={`orphan-${i}`} session={s} allSubagents={subagentSessions} depth={0} />
+              ))}
           </div>
         </div>
       )}
 
-      {/* File Changes */}
+      {/* File Changes (collapsible) */}
       {anchor.file_changes && anchor.file_changes.length > 0 && (
-        <div>
-          <h4 className="text-sm font-heading font-semibold mb-2">File Changes</h4>
-          <div className="space-y-1">
-            {anchor.file_changes.map((f, i) => (
-              <div key={i} className="flex items-center gap-3 text-sm font-mono py-1">
-                <span className="flex-1 truncate">{f.path}</span>
-                <span className="text-oobo-green text-xs">+{f.added}</span>
-                <span className="text-destructive text-xs">-{f.deleted}</span>
-                <AttributionBadge attribution={f.attribution} />
-                {f.agent && <span className="text-xs text-muted-foreground">{f.agent}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
+        <CollapsibleFileChanges files={anchor.file_changes} />
       )}
 
       {/* File Interactions */}
@@ -172,28 +234,54 @@ export function AnchorDetail({ payload, committedAt }: AnchorDetailProps) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Sessions */}
-      {anchor.sessions && anchor.sessions.length > 0 && (
-        <div>
-          <h4 className="text-sm font-heading font-semibold mb-2">Sessions</h4>
-          <div className="space-y-2">
-            {rootSessions.map((s, i) => (
-              <SessionCard key={i} session={s} allSubagents={subagentSessions} depth={0} />
-            ))}
-            {subagentSessions
-              .filter((sub) => !allSessions.some((r) => r.session_id === sub.parent_session_id))
-              .map((s, i) => (
-                <SessionCard key={`orphan-${i}`} session={s} allSubagents={subagentSessions} depth={0} />
-              ))}
-          </div>
+function StatCell({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-md bg-background border px-3 py-2">
+      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-sm font-heading font-semibold truncate">{value}</p>
+      {sub && <p className="text-[10px] text-muted-foreground truncate">{sub}</p>}
+    </div>
+  );
+}
+
+function CollapsibleFileChanges({ files }: { files: NonNullable<AnchorPayload["anchor"]>["file_changes"] & object }) {
+  const [open, setOpen] = useState(false);
+  const totalAdded = files.reduce((sum, f) => sum + f.added, 0);
+  const totalDeleted = files.reduce((sum, f) => sum + f.deleted, 0);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 text-sm font-heading font-semibold hover:text-foreground/80 transition-colors"
+      >
+        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`} />
+        <span>Files Changed</span>
+        <span className="text-xs font-normal text-muted-foreground">
+          {files.length} file{files.length !== 1 ? "s" : ""}
+          <span className="ml-1.5 text-oobo-green">+{totalAdded}</span>
+          <span className="ml-1 text-destructive">-{totalDeleted}</span>
+        </span>
+      </button>
+      {open && (
+        <div className="space-y-1 mt-2 ml-5">
+          {files.map((f, i) => (
+            <div key={i} className="flex items-center gap-3 text-xs font-mono py-0.5">
+              <span className="flex-1 truncate text-muted-foreground">{f.path}</span>
+              <span className="text-oobo-green">+{f.added}</span>
+              <span className="text-destructive">-{f.deleted}</span>
+              <AttributionBadge attribution={f.attribution} />
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
-
-type SessionEntry = NonNullable<NonNullable<AnchorPayload["anchor"]>["sessions"]>[number];
 
 const MAX_NESTING_DEPTH = 5;
 
@@ -227,23 +315,14 @@ function SessionCard({
         {s.subagent_count != null && s.subagent_count > 0 && (
           <span className="text-xs text-muted-foreground">{s.subagent_count} subagent{s.subagent_count > 1 ? "s" : ""}</span>
         )}
-        {s.peer_session_ids && s.peer_session_ids.length > 0 && (
-          <span className="text-xs text-muted-foreground">{s.peer_session_ids.length} peer{s.peer_session_ids.length > 1 ? "s" : ""}</span>
-        )}
 
         <div className="ml-auto flex flex-wrap gap-3 text-xs text-muted-foreground">
-          {s.input_tokens != null && <span>{s.input_tokens.toLocaleString()} in</span>}
-          {s.output_tokens != null && <span>{s.output_tokens.toLocaleString()} out</span>}
-          {s.duration_secs != null && <span>{s.duration_secs}s</span>}
+          {s.input_tokens != null && <span>{formatNumber(s.input_tokens)} in</span>}
+          {s.output_tokens != null && <span>{formatNumber(s.output_tokens)} out</span>}
+          {s.duration_secs != null && <span>{formatDurationSecs(s.duration_secs)}</span>}
           {s.tool_calls != null && <span>{s.tool_calls} calls</span>}
-          {s.thinking_duration_ms != null && <span>{formatDuration(s.thinking_duration_ms)} thinking</span>}
+          {s.thinking_duration_ms != null && <span>{formatDurationMs(s.thinking_duration_ms)} thinking</span>}
         </div>
-
-        {s.tool_usage && Object.keys(s.tool_usage).length > 0 && (
-          <div className="w-full text-xs text-muted-foreground pt-1 border-t border-border/50 mt-1">
-            {formatToolUsage(s.tool_usage)}
-          </div>
-        )}
       </div>
 
       {children.length > 0 && (
