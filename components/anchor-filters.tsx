@@ -1,7 +1,6 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Search } from "lucide-react";
 
@@ -39,17 +38,19 @@ export function AnchorFilters({
       </div>
 
       <div className="flex gap-2">
-        <div className="flex rounded-md border border-input overflow-hidden">
+        <div className="flex h-9 items-stretch rounded-md border border-input">
           {AUTHOR_TYPES.map((t) => (
-            <Button
+            <button
               key={t}
-              variant={authorType === t ? "default" : "ghost"}
-              size="sm"
               onClick={() => onAuthorTypeChange(t)}
-              className="rounded-none border-0 capitalize"
+              className={`px-3 text-xs font-medium capitalize transition-colors first:rounded-l-md last:rounded-r-md ${
+                authorType === t
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              }`}
             >
               {t}
-            </Button>
+            </button>
           ))}
         </div>
 
