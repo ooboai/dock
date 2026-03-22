@@ -25,14 +25,14 @@ export function AiPercentageBar({ percentage, showLabel = true, className }: AiP
       <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden flex">
         {aiPct > 0 && (
           <div
-            className="h-full bg-oobo-cyan transition-all duration-300"
+            className="h-full bg-foreground/70 transition-all duration-300"
             style={{ width: `${aiPct}%` }}
             title={`AI: ${aiPct.toFixed(1)}%`}
           />
         )}
         {humanPct > 0 && (
           <div
-            className="h-full bg-oobo-teal transition-all duration-300"
+            className="h-full bg-foreground/20 transition-all duration-300"
             style={{ width: `${humanPct}%` }}
             title={`Human: ${humanPct.toFixed(1)}%`}
           />

@@ -35,8 +35,8 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-oobo-teal/10 p-2.5">
-              <Anchor className="h-5 w-5 text-oobo-teal" />
+            <div className="rounded-lg bg-foreground/5 p-2.5">
+              <Anchor className="h-5 w-5 text-foreground/60" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Anchors</p>
@@ -49,8 +49,8 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-oobo-cyan/10 p-2.5">
-              <GitCommitHorizontal className="h-5 w-5 text-oobo-cyan" />
+            <div className="rounded-lg bg-foreground/5 p-2.5">
+              <GitCommitHorizontal className="h-5 w-5 text-foreground/60" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">AI vs Human Code</p>
@@ -63,8 +63,8 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-oobo-highlight/10 p-2.5">
-              <Binary className="h-5 w-5 text-oobo-highlight" />
+            <div className="rounded-lg bg-foreground/5 p-2.5">
+              <Binary className="h-5 w-5 text-foreground/60" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Tokens</p>
@@ -77,8 +77,8 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-oobo-green/10 p-2.5">
-              <FileCode2 className="h-5 w-5 text-oobo-green" />
+            <div className="rounded-lg bg-foreground/5 p-2.5">
+              <FileCode2 className="h-5 w-5 text-foreground/60" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Lines Changed</p>
@@ -88,7 +88,7 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
               <p className="text-xs text-muted-foreground">
                 <span className="text-oobo-green">+{formatNumber(stats.added)}</span>
                 {" / "}
-                <span className="text-oobo-red">-{formatNumber(stats.deleted)}</span>
+                <span className="text-destructive">-{formatNumber(stats.deleted)}</span>
               </p>
             </div>
           </div>

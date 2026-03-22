@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
 const AUTHOR_TYPE_STYLES: Record<string, string> = {
-  agent: "bg-oobo-cyan text-white",
-  assisted: "bg-gradient-to-r from-[#0ea5e9] to-[#14b8a6] text-white",
-  human: "bg-oobo-teal text-white",
-  automated: "bg-oobo-muted text-white",
+  agent: "bg-foreground text-background",
+  assisted: "bg-foreground/80 text-background",
+  human: "bg-muted-foreground/20 text-foreground",
+  automated: "bg-muted text-muted-foreground",
 };
 
 interface AuthorTypeBadgeProps {

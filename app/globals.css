@@ -20,18 +20,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-oobo-primary: #1F4F6D;
-  --color-oobo-secondary: #5F7F84;
-  --color-oobo-highlight: #7DD3E8;
-  --color-oobo-teal: #14b8a6;
-  --color-oobo-teal-dark: #0d9488;
-  --color-oobo-cyan: #0ea5e9;
-  --color-oobo-dark: #111111;
   --color-oobo-green: #10b981;
-  --color-oobo-red: #ef4444;
-  --color-oobo-yellow: #f59e0b;
-  --color-oobo-link: #0284c7;
-  --color-oobo-muted: #6b7280;
+  --color-oobo-teal: #14b8a6;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

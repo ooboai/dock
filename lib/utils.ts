@@ -22,16 +22,3 @@ export function timeAgo(dateStr: string | null): string {
   if (diffMonth < 12) return `${diffMonth}mo ago`;
   return `${Math.floor(diffMonth / 12)}y ago`;
 }
-
-export function formatFullDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}

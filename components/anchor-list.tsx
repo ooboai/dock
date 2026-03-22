@@ -14,9 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AiPercentageBar } from "@/components/ai-percentage-bar";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import { AnchorDetail } from "@/components/anchor-detail";
+import { TranscriptPanel } from "@/components/transcript-panel";
 import type { TranscriptMessage } from "@/lib/types";
-import { timeAgo, formatFullDate } from "@/lib/utils";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { timeAgo } from "@/lib/utils";
+import { ChevronDown, ChevronLeft, ChevronRight, MessageSquareText } from "lucide-react";
 
 interface AnchorRow {
   id: string;
@@ -47,6 +48,11 @@ interface AnchorListProps {
 
 export function AnchorList({ anchors, pagination, onPageChange, loading }: AnchorListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [transcriptAnchorId, setTranscriptAnchorId] = useState<string | null>(null);
+
+  const transcriptAnchor = transcriptAnchorId
+    ? anchors.find((a) => a.id === transcriptAnchorId)
+    : null;
 
   if (loading) {
     return (
@@ -81,7 +87,8 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
               <TableHead className="w-[100px]">Type</TableHead>
               <TableHead className="w-[140px]">AI %</TableHead>
               <TableHead className="w-[100px]">Branch</TableHead>
-              <TableHead className="w-[160px]">Date</TableHead>
+              <TableHead className="w-[140px]">Date</TableHead>
+              <TableHead className="w-[36px]" />
               <TableHead className="w-[40px]" />
             </TableRow>
           </TableHeader>
@@ -104,7 +111,25 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                   <TableCell>
                     <code className="text-xs rounded bg-muted px-1.5 py-0.5">{anchor.branch ?? "—"}</code>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground" title={formatFullDate(anchor.committedAt)}>{timeAgo(anchor.committedAt)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {timeAgo(anchor.committedAt)}
+                  </TableCell>
+                  <TableCell>
+                    {anchor.transcript ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTranscriptAnchorId(transcriptAnchorId === anchor.id ? null : anchor.id);
+                        }}
+                        className={`p-1 rounded transition-colors ${transcriptAnchorId === anchor.id ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                        title="View transcript"
+                      >
+                        <MessageSquareText className="h-3.5 w-3.5" />
+                      </button>
+                    ) : (
+                      <span className="block w-3.5" />
+                    )}
+                  </TableCell>
                   <TableCell>
                     <ChevronDown
                       className={`h-4 w-4 text-muted-foreground transition-transform ${expandedId === anchor.id ? "rotate-180" : ""}`}
@@ -113,11 +138,10 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                 </TableRow>
                 {expandedId === anchor.id && (
                   <TableRow key={`${anchor.id}-detail`}>
-                    <TableCell colSpan={8} className="p-0">
+                    <TableCell colSpan={9} className="p-0">
                       <AnchorDetail
                         payload={anchor.payload as Record<string, unknown>}
-                        hasTranscript={!!anchor.transcript}
-                        transcriptMessages={anchor.transcript?.messages}
+                        committedAt={anchor.committedAt}
                       />
                     </TableCell>
                   </TableRow>
@@ -154,6 +178,16 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Transcript side panel */}
+      {transcriptAnchor?.transcript && (
+        <TranscriptPanel
+          messages={transcriptAnchor.transcript.messages}
+          commitHash={transcriptAnchor.commitHash}
+          commitMessage={transcriptAnchor.message}
+          onClose={() => setTranscriptAnchorId(null)}
+        />
       )}
     </div>
   );

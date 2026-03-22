@@ -122,7 +122,7 @@ export default function DashboardPage() {
               href="https://github.com/ooboai/oobo"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-muted-foreground hover:text-oobo-link transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               powered by{" "}
               <span className="font-semibold bg-gradient-to-r from-[#7DD3E8] to-[#14b8a6] bg-clip-text text-transparent">

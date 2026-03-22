@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
-import type { TranscriptMessage } from "@/lib/types";
-
-export type { TranscriptMessage };
 
 interface AnchorPayload {
   anchor?: {
@@ -48,43 +44,35 @@ interface AnchorPayload {
       }>;
     }>;
   };
-  transcript?: TranscriptMessage[];
-  session_transcripts?: Array<{
-    session_id: string;
-    parent_session_id?: string;
-    subagent_type?: string;
-    messages: TranscriptMessage[];
-  }>;
 }
 
 interface AnchorDetailProps {
   payload: AnchorPayload;
-  hasTranscript: boolean;
-  transcriptMessages?: TranscriptMessage[];
+  committedAt?: string | null;
 }
 
 function AttributionBadge({ attribution }: { attribution: string }) {
   const styles: Record<string, string> = {
-    ai: "bg-oobo-cyan/10 text-oobo-cyan border-oobo-cyan/20",
-    human: "bg-oobo-teal/10 text-oobo-teal border-oobo-teal/20",
-    mixed: "bg-oobo-yellow/10 text-oobo-yellow border-oobo-yellow/20",
+    ai: "bg-accent text-accent-foreground border-border",
+    human: "bg-muted text-muted-foreground border-border",
+    mixed: "bg-muted text-foreground border-border",
   };
   return (
-    <Badge variant="outline" className={styles[attribution] ?? ""}>
+    <Badge variant="outline" className={`text-[10px] ${styles[attribution] ?? ""}`}>
       {attribution}
     </Badge>
   );
 }
 
 function FileRoleBadge({ role }: { role: "writer" | "reader" | "both" }) {
-  const styles: Record<string, string> = {
-    writer: "bg-oobo-cyan/10 text-oobo-cyan border-oobo-cyan/20",
-    reader: "bg-oobo-teal/10 text-oobo-teal border-oobo-teal/20",
-    both: "bg-oobo-yellow/10 text-oobo-yellow border-oobo-yellow/20",
+  const labels: Record<string, string> = {
+    writer: "write",
+    reader: "read",
+    both: "read+write",
   };
   return (
-    <Badge variant="outline" className={styles[role] ?? ""}>
-      {role}
+    <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border">
+      {labels[role] ?? role}
     </Badge>
   );
 }
@@ -102,118 +90,19 @@ function formatDuration(ms: number): string {
   return `${Math.floor(secs / 60)}m ${secs % 60}s`;
 }
 
-function TranscriptMessageLine({ m, expanded }: { m: TranscriptMessage; expanded: boolean }) {
-  const maxLen = expanded ? 500 : 200;
-  const timestamp = m.timestamp_ms
-    ? new Date(m.timestamp_ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-    : null;
-
-  if (m.tool_call) {
-    const name = m.tool_call.name ?? "unknown";
-    const summary = m.tool_call.input_summary ?? "";
-    const summaryMax = expanded ? 300 : 120;
-    return (
-      <div className="flex items-start gap-2 py-1 px-2 rounded bg-oobo-cyan/5 font-mono text-xs">
-        <span className="text-oobo-cyan shrink-0 mt-0.5">→</span>
-        <div className="min-w-0 flex-1">
-          <span className="font-semibold text-oobo-cyan">{name}</span>
-          {summary && <span className="text-muted-foreground ml-1">({summary.slice(0, summaryMax)}{summary.length > summaryMax ? "…" : ""})</span>}
-        </div>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  if (m.tool_result) {
-    const name = m.tool_result.name ?? "unknown";
-    const succeeded = m.tool_result.success === true;
-    return (
-      <div className={`flex items-start gap-2 py-1 px-2 rounded font-mono text-xs ${succeeded ? "bg-oobo-teal/5" : "bg-oobo-red/5"}`}>
-        <span className={`shrink-0 mt-0.5 ${succeeded ? "text-oobo-teal" : "text-oobo-red"}`}>←</span>
-        <div className="min-w-0 flex-1">
-          <span className={`font-semibold ${succeeded ? "text-oobo-teal" : "text-oobo-red"}`}>{name}</span>
-          <span className="text-muted-foreground ml-1">{succeeded ? "ok" : "failed"}</span>
-          {m.tool_result.output_summary && (
-            <span className="text-muted-foreground"> — {m.tool_result.output_summary.slice(0, maxLen)}{m.tool_result.output_summary.length > maxLen ? "…" : ""}</span>
-          )}
-        </div>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  if (m.thinking) {
-    return (
-      <div className="flex items-start gap-2 py-1 px-2 rounded bg-purple-500/5 text-xs">
-        <span className="text-purple-400 shrink-0 mt-0.5 italic">💭</span>
-        <span className="text-muted-foreground italic min-w-0 flex-1">{m.thinking.slice(0, maxLen)}{m.thinking.length > maxLen ? "…" : ""}</span>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  if (m.text) {
-    const isAssistant = m.role === "assistant";
-    return (
-      <div className="flex items-start gap-2 py-1.5 px-2 text-sm">
-        <span className={`text-xs font-semibold shrink-0 mt-0.5 w-16 ${isAssistant ? "text-oobo-cyan" : "text-oobo-teal"}`}>
-          {m.role}
-        </span>
-        <span className="text-foreground/80 min-w-0 flex-1">{m.text.slice(0, maxLen)}{m.text.length > maxLen ? "…" : ""}</span>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  return null;
+function formatFullDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function transcriptStats(messages: TranscriptMessage[]) {
-  let text = 0, toolCalls = 0, toolResults = 0, thinking = 0;
-  for (const m of messages) {
-    if (m.tool_call) toolCalls++;
-    else if (m.tool_result) toolResults++;
-    else if (m.thinking) thinking++;
-    else if (m.text) text++;
-  }
-  return { text, toolCalls, toolResults, thinking, total: messages.length };
-}
-
-function TranscriptSection({ messages }: { messages: TranscriptMessage[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const stats = transcriptStats(messages);
-  const previewCount = 5;
-  const shown = expanded ? messages : messages.slice(0, previewCount);
-  const hasMore = messages.length > previewCount;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-heading font-semibold">Transcript</h4>
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span>{stats.text} message{stats.text !== 1 ? "s" : ""}</span>
-          {stats.toolCalls > 0 && <span>· {stats.toolCalls} tool call{stats.toolCalls !== 1 ? "s" : ""}</span>}
-          {stats.thinking > 0 && <span>· {stats.thinking} thinking</span>}
-        </div>
-      </div>
-      <div className={`space-y-0.5 rounded-lg border bg-background/50 p-1.5 ${expanded ? "max-h-128" : "max-h-64"} overflow-y-auto`}>
-        {shown.filter((m) => m.text || m.tool_call || m.tool_result || m.thinking).map((m, i) => (
-          <TranscriptMessageLine key={i} m={m} expanded={expanded} />
-        ))}
-      </div>
-      {hasMore && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-1.5 text-xs text-oobo-cyan hover:text-oobo-cyan/80 transition-colors"
-        >
-          {expanded ? "Show less" : `Show all ${messages.length} messages`}
-        </button>
-      )}
-    </div>
-  );
-}
-
-export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: AnchorDetailProps) {
+export function AnchorDetail({ payload, committedAt }: AnchorDetailProps) {
   const anchor = payload.anchor;
   if (!anchor) return null;
 
@@ -223,6 +112,11 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
 
   return (
     <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+      {/* Full date */}
+      {committedAt && (
+        <p className="text-xs text-muted-foreground/60">{formatFullDate(committedAt)}</p>
+      )}
+
       {/* Contributors */}
       {anchor.contributors && anchor.contributors.length > 0 && (
         <div>
@@ -248,7 +142,7 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
               <div key={i} className="flex items-center gap-3 text-sm font-mono py-1">
                 <span className="flex-1 truncate">{f.path}</span>
                 <span className="text-oobo-green text-xs">+{f.added}</span>
-                <span className="text-oobo-red text-xs">-{f.deleted}</span>
+                <span className="text-destructive text-xs">-{f.deleted}</span>
                 <AttributionBadge attribution={f.attribution} />
                 {f.agent && <span className="text-xs text-muted-foreground">{f.agent}</span>}
               </div>
@@ -257,7 +151,7 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
         </div>
       )}
 
-      {/* File Interactions (multi-session file sharing) */}
+      {/* File Interactions */}
       {anchor.file_interactions && anchor.file_interactions.length > 0 && (
         <div>
           <h4 className="text-sm font-heading font-semibold mb-2">File Interactions</h4>
@@ -287,7 +181,6 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
             {rootSessions.map((s, i) => (
               <SessionCard key={i} session={s} allSubagents={subagentSessions} depth={0} />
             ))}
-            {/* Orphaned subagents (parent not in this commit) */}
             {subagentSessions
               .filter((sub) => !allSessions.some((r) => r.session_id === sub.parent_session_id))
               .map((s, i) => (
@@ -295,12 +188,6 @@ export function AnchorDetail({ payload, hasTranscript, transcriptMessages }: Anc
               ))}
           </div>
         </div>
-      )}
-
-      {/* Transcript */}
-      {/* TODO: Add per-session transcript view using payload.session_transcripts when available */}
-      {hasTranscript && transcriptMessages && transcriptMessages.length > 0 && (
-        <TranscriptSection messages={transcriptMessages} />
       )}
     </div>
   );
@@ -333,7 +220,7 @@ function SessionCard({
           <Badge variant="outline" className="text-xs">{s.link_type}</Badge>
         )}
         {s.is_subagent && (
-          <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/20">
+          <Badge variant="outline" className="text-xs bg-muted text-muted-foreground">
             ↳ {s.subagent_type ?? "subagent"}
           </Badge>
         )}
