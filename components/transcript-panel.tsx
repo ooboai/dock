@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, ChevronRight, Terminal, CheckCircle2, XCircle } from "lucide-react";
 import type { TranscriptMessage } from "@/lib/types";
 
 function transcriptStats(messages: TranscriptMessage[]) {
@@ -14,67 +14,109 @@ function transcriptStats(messages: TranscriptMessage[]) {
   return { text, toolCalls, thinking, total: messages.length };
 }
 
-function MessageLine({ m }: { m: TranscriptMessage }) {
+function ToolCallBlock({ m }: { m: TranscriptMessage }) {
+  const [open, setOpen] = useState(false);
+  const name = m.tool_call?.name ?? "unknown";
+  const summary = m.tool_call?.input_summary ?? "";
+
+  return (
+    <div className="rounded border bg-muted/30">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-xs font-mono text-left hover:bg-muted/50 transition-colors"
+      >
+        <ChevronRight className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-90" : ""}`} />
+        <Terminal className="h-3 w-3 text-muted-foreground shrink-0" />
+        <span className="font-semibold text-foreground">{name}</span>
+        {!open && summary && (
+          <span className="text-muted-foreground truncate ml-1">{summary}</span>
+        )}
+      </button>
+      {open && summary && (
+        <div className="px-2.5 pb-2 pt-0.5 text-xs text-muted-foreground whitespace-pre-wrap wrap-break-word border-t border-border/50 mx-2.5 mt-0.5">
+          {summary}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ToolResultBlock({ m }: { m: TranscriptMessage }) {
+  const [open, setOpen] = useState(false);
+  const name = m.tool_result?.name ?? "unknown";
+  const succeeded = m.tool_result?.success === true;
+  const output = m.tool_result?.output_summary;
+
+  return (
+    <div className="rounded border bg-muted/30">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-xs font-mono text-left hover:bg-muted/50 transition-colors"
+      >
+        <ChevronRight className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-90" : ""}`} />
+        {succeeded
+          ? <CheckCircle2 className="h-3 w-3 text-oobo-green shrink-0" />
+          : <XCircle className="h-3 w-3 text-destructive shrink-0" />
+        }
+        <span className={`font-semibold ${succeeded ? "text-foreground" : "text-destructive"}`}>{name}</span>
+        <span className={`text-muted-foreground ${succeeded ? "" : "text-destructive"}`}>{succeeded ? "ok" : "failed"}</span>
+        {!open && output && (
+          <span className="text-muted-foreground truncate ml-1">— {output}</span>
+        )}
+      </button>
+      {open && output && (
+        <div className="px-2.5 pb-2 pt-0.5 text-xs text-muted-foreground whitespace-pre-wrap wrap-break-word border-t border-border/50 mx-2.5 mt-0.5">
+          {output}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ThinkingBlock({ m }: { m: TranscriptMessage }) {
+  const [open, setOpen] = useState(false);
+  const text = m.thinking ?? "";
+
+  return (
+    <div className="rounded border bg-muted/20">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-xs text-left hover:bg-muted/30 transition-colors"
+      >
+        <ChevronRight className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-90" : ""}`} />
+        <span className="text-muted-foreground italic">Thinking…</span>
+      </button>
+      {open && (
+        <div className="px-2.5 pb-2 pt-0.5 text-xs text-muted-foreground italic whitespace-pre-wrap wrap-break-word border-t border-border/50 mx-2.5 mt-0.5">
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TextMessage({ m }: { m: TranscriptMessage }) {
+  const isAssistant = m.role === "assistant";
   const timestamp = m.timestamp_ms
     ? new Date(m.timestamp_ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
     : null;
 
-  if (m.tool_call) {
-    const name = m.tool_call.name ?? "unknown";
-    const summary = m.tool_call.input_summary ?? "";
-    return (
-      <div className="flex items-start gap-2 py-1 px-2.5 rounded bg-muted/50 font-mono text-xs">
-        <span className="text-muted-foreground shrink-0 mt-0.5">→</span>
-        <div className="min-w-0 flex-1">
-          <span className="font-semibold text-foreground">{name}</span>
-          {summary && <span className="text-muted-foreground ml-1">({summary.slice(0, 300)}{summary.length > 300 ? "…" : ""})</span>}
-        </div>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
+  return (
+    <div className={`flex items-start gap-2 py-1.5 px-2.5 text-sm ${isAssistant ? "bg-accent/30 rounded" : ""}`}>
+      <span className="text-xs font-semibold shrink-0 mt-0.5 w-16 text-muted-foreground">
+        {m.role}
+      </span>
+      <span className="text-foreground/80 min-w-0 flex-1 whitespace-pre-wrap wrap-break-word">{m.text}</span>
+      {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
+    </div>
+  );
+}
 
-  if (m.tool_result) {
-    const name = m.tool_result.name ?? "unknown";
-    const succeeded = m.tool_result.success === true;
-    return (
-      <div className="flex items-start gap-2 py-1 px-2.5 rounded bg-muted/50 font-mono text-xs">
-        <span className="text-muted-foreground shrink-0 mt-0.5">←</span>
-        <div className="min-w-0 flex-1">
-          <span className={`font-semibold ${succeeded ? "text-foreground" : "text-destructive"}`}>{name}</span>
-          <span className={`ml-1 ${succeeded ? "text-muted-foreground" : "text-destructive"}`}>{succeeded ? "ok" : "failed"}</span>
-          {m.tool_result.output_summary && (
-            <span className="text-muted-foreground"> — {m.tool_result.output_summary.slice(0, 300)}{m.tool_result.output_summary.length > 300 ? "…" : ""}</span>
-          )}
-        </div>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  if (m.thinking) {
-    return (
-      <div className="flex items-start gap-2 py-1 px-2.5 rounded bg-muted/30 text-xs">
-        <span className="text-muted-foreground shrink-0 mt-0.5 italic text-[10px]">think</span>
-        <span className="text-muted-foreground italic min-w-0 flex-1">{m.thinking.slice(0, 500)}{m.thinking.length > 500 ? "…" : ""}</span>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
-  if (m.text) {
-    const isAssistant = m.role === "assistant";
-    return (
-      <div className={`flex items-start gap-2 py-1.5 px-2.5 text-sm ${isAssistant ? "bg-accent/30 rounded" : ""}`}>
-        <span className="text-xs font-semibold shrink-0 mt-0.5 w-16 text-muted-foreground">
-          {m.role}
-        </span>
-        <span className="text-foreground/80 min-w-0 flex-1">{m.text.slice(0, 500)}{m.text.length > 500 ? "…" : ""}</span>
-        {timestamp && <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{timestamp}</span>}
-      </div>
-    );
-  }
-
+function MessageLine({ m }: { m: TranscriptMessage }) {
+  if (m.tool_call) return <ToolCallBlock m={m} />;
+  if (m.tool_result) return <ToolResultBlock m={m} />;
+  if (m.thinking) return <ThinkingBlock m={m} />;
+  if (m.text) return <TextMessage m={m} />;
   return null;
 }
 
@@ -117,7 +159,7 @@ export function TranscriptPanel({ messages, commitHash, commitMessage, onClose }
           </button>
         </div>
 
-        {/* Filter tabs + stats */}
+        {/* Filter tabs */}
         <div className="flex items-center gap-1 px-4 py-2 border-b shrink-0 text-xs">
           {(["all", "text", "tools", "thinking"] as const).map((f) => {
             const count = f === "all" ? stats.total : f === "text" ? stats.text : f === "tools" ? stats.toolCalls : stats.thinking;
@@ -136,7 +178,7 @@ export function TranscriptPanel({ messages, commitHash, commitMessage, onClose }
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {filtered.map((m, i) => (
             <MessageLine key={i} m={m} />
           ))}
