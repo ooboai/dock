@@ -1,0 +1,59 @@
+{
+  "oobo_version": "0.1.10",
+  "commit_hash": "705780d4ef7e75711143f0e5d930a52830926359",
+  "branch": "main",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    },
+    {
+      "name": "cursor",
+      "role": "agent",
+      "model": "claude-4.6-opus-high-thinking"
+    }
+  ],
+  "committed_at": 1774220724,
+  "message": "ui: improve transcript display and show relative timestamps",
+  "files_changed": [
+    "components/anchor-detail.tsx",
+    "components/anchor-list.tsx",
+    "lib/utils.ts"
+  ],
+  "added": 116,
+  "deleted": 45,
+  "file_changes": [
+    {
+      "path": "components/anchor-detail.tsx",
+      "added": 83,
+      "deleted": 32,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "components/anchor-list.tsx",
+      "added": 2,
+      "deleted": 13,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "lib/utils.ts",
+      "added": 31,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    }
+  ],
+  "ai_added": 116,
+  "ai_deleted": 45,
+  "human_added": 0,
+  "human_deleted": 0,
+  "ai_percentage": 100.0,
+  "session_ids": [
+    "a4bc4563-3c83-478b-91f4-c6c7d0bf74e5"
+  ],
+  "transparency_mode": "off"
+}
