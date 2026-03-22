@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
       orderBy: { committedAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
+      // TODO: include sessionTranscripts when per-session transcript UI is built
       include: { transcript: true },
     }),
     prisma.anchor.count({ where }),

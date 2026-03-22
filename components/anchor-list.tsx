@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AiPercentageBar } from "@/components/ai-percentage-bar";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import { AnchorDetail } from "@/components/anchor-detail";
+import type { TranscriptMessage } from "@/lib/types";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface AnchorRow {
@@ -26,7 +27,7 @@ interface AnchorRow {
   branch: string | null;
   committedAt: string | null;
   payload: Record<string, unknown>;
-  transcript: { messages: unknown } | null;
+  transcript: { messages: TranscriptMessage[] } | null;
 }
 
 interface Pagination {
@@ -127,9 +128,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                       <AnchorDetail
                         payload={anchor.payload as Record<string, unknown>}
                         hasTranscript={!!anchor.transcript}
-                        transcriptMessages={
-                          anchor.transcript?.messages as Array<{ role: string; text: string }> | undefined
-                        }
+                        transcriptMessages={anchor.transcript?.messages}
                       />
                     </TableCell>
                   </TableRow>

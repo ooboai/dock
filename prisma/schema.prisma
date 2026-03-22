@@ -24,6 +24,7 @@ model Anchor {
   payload      Json
   createdAt    DateTime    @default(now())
   transcript   Transcript?
+  sessionTranscripts SessionTranscript[]
 
   @@unique([gitRemote, commitHash])
   @@index([committedAt])
@@ -37,4 +38,18 @@ model Transcript {
   anchor    Anchor   @relation(fields: [anchorId], references: [id], onDelete: Cascade)
   messages  Json
   createdAt DateTime @default(now())
+}
+
+model SessionTranscript {
+  id              String   @id @default(cuid())
+  anchorId        String
+  anchor          Anchor   @relation(fields: [anchorId], references: [id], onDelete: Cascade)
+  sessionId       String
+  parentSessionId String?
+  subagentType    String?
+  messages        Json
+  createdAt       DateTime @default(now())
+
+  @@unique([anchorId, sessionId])
+  @@index([sessionId])
 }
