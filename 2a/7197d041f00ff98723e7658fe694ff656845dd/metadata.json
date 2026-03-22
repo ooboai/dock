@@ -1,0 +1,43 @@
+{
+  "oobo_version": "0.1.10",
+  "commit_hash": "2a7197d041f00ff98723e7658fe694ff656845dd",
+  "branch": "main",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    },
+    {
+      "name": "cursor",
+      "role": "agent",
+      "model": "claude-4.6-opus-high-thinking"
+    }
+  ],
+  "committed_at": 1774223403,
+  "message": "ui: show full transcript content with expand/collapse for tool calls and thinking",
+  "files_changed": [
+    "components/transcript-panel.tsx"
+  ],
+  "added": 99,
+  "deleted": 57,
+  "file_changes": [
+    {
+      "path": "components/transcript-panel.tsx",
+      "added": 99,
+      "deleted": 57,
+      "attribution": "human"
+    }
+  ],
+  "ai_added": 0,
+  "ai_deleted": 0,
+  "human_added": 99,
+  "human_deleted": 57,
+  "ai_percentage": 0.0,
+  "session_ids": [
+    "a4bc4563-3c83-478b-91f4-c6c7d0bf74e5",
+    "b3a78b2d-ecb9-4496-a0ab-47a1ff6bf7b7"
+  ],
+  "transparency_mode": "off"
+}

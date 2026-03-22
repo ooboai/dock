@@ -1,0 +1,37 @@
+{
+  "session_id": "b3a78b2d-ecb9-4496-a0ab-47a1ff6bf7b7",
+  "agent": "cursor",
+  "model": "composer-2-fast",
+  "link_type": "explicit",
+  "duration_secs": 113,
+  "tool_calls": 8,
+  "files_touched": [
+    "lib/types.ts",
+    "app/api/anchors/route.ts",
+    "app/page.tsx",
+    "__tests__/components/author-type-badge.test.tsx",
+    "components/anchor-list.tsx",
+    "prisma/schema.prisma",
+    "components/transcript-panel.tsx",
+    "components/author-type-badge.tsx",
+    "__tests__/api/ingest.test.ts",
+    "components/anchor-filters.tsx",
+    "components/ai-percentage-bar.tsx",
+    "lib/utils.ts",
+    "components/anchor-detail.tsx",
+    "components/stats-summary.tsx",
+    "app/api/anchors/ingest/route.ts",
+    "components/ui/input.tsx",
+    "tsconfig.json",
+    "prisma/migrations/20260322_add_session_transcripts/migration.sql",
+    "app/globals.css",
+    "components/ui/select.tsx"
+  ],
+  "tool_usage": {
+    "Grep": 2,
+    "Read": 4
+  },
+  "thinking_duration_ms": 9414,
+  "is_subagent": false,
+  "is_estimated": false
+}
