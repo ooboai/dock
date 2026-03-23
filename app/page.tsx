@@ -4,20 +4,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { StatsSummary } from "@/components/stats-summary";
 import { AnchorFilters } from "@/components/anchor-filters";
 import { AnchorList } from "@/components/anchor-list";
+import { TranscriptPanel } from "@/components/transcript-panel";
 import { Anchor as AnchorIcon } from "lucide-react";
-
-interface AnchorRow {
-  id: string;
-  commitHash: string;
-  message: string | null;
-  author: string | null;
-  authorType: string | null;
-  aiPercentage: number | null;
-  branch: string | null;
-  committedAt: string | null;
-  payload: Record<string, unknown>;
-  transcript: { messages: unknown } | null;
-}
+import type { AnchorRow } from "@/components/anchor-list";
 
 interface StatsData {
   count: number;
@@ -58,6 +47,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
+  const [transcriptAnchor, setTranscriptAnchor] = useState<AnchorRow | null>(null);
+
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -96,24 +87,26 @@ export default function DashboardPage() {
     fetchAnchors();
   }, [fetchAnchors]);
 
-  // Poll for new anchors every 5 seconds
   useEffect(() => {
     const interval = setInterval(fetchAnchors, 5000);
     return () => clearInterval(interval);
   }, [fetchAnchors]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, authorType, branch]);
 
+  const handleTranscriptToggle = useCallback((anchor: AnchorRow | null) => {
+    setTranscriptAnchor(anchor);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
+      <header className="border-b bg-card shrink-0">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7DD3E8] to-[#14b8a6]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-[#7DD3E8] to-oobo-teal">
                 <AnchorIcon className="h-4 w-4 text-white" />
               </div>
               <h1 className="font-heading text-lg font-bold text-primary">dock</h1>
@@ -125,7 +118,7 @@ export default function DashboardPage() {
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               powered by{" "}
-              <span className="font-semibold bg-gradient-to-r from-[#7DD3E8] to-[#14b8a6] bg-clip-text text-transparent">
+              <span className="font-semibold bg-linear-to-r from-[#7DD3E8] to-oobo-teal bg-clip-text text-transparent">
                 oobo
               </span>
             </a>
@@ -133,26 +126,43 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <StatsSummary stats={stats} />
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        {/* Main content — scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            <StatsSummary stats={stats} />
 
-        <AnchorFilters
-          search={search}
-          onSearchChange={setSearch}
-          authorType={authorType}
-          onAuthorTypeChange={setAuthorType}
-          branch={branch}
-          onBranchChange={setBranch}
-          branches={branches}
-        />
+            <AnchorFilters
+              search={search}
+              onSearchChange={setSearch}
+              authorType={authorType}
+              onAuthorTypeChange={setAuthorType}
+              branch={branch}
+              onBranchChange={setBranch}
+              branches={branches}
+            />
 
-        <AnchorList
-          anchors={anchors}
-          pagination={pagination}
-          onPageChange={setPage}
-          loading={loading}
-        />
-      </main>
+            <AnchorList
+              anchors={anchors}
+              pagination={pagination}
+              onPageChange={setPage}
+              loading={loading}
+              transcriptAnchorId={transcriptAnchor?.id ?? null}
+              onTranscriptToggle={handleTranscriptToggle}
+            />
+          </div>
+        </div>
+
+        {/* Transcript panel — flex sibling, shares space */}
+        {transcriptAnchor?.transcript && (
+          <TranscriptPanel
+            messages={transcriptAnchor.transcript.messages}
+            commitHash={transcriptAnchor.commitHash}
+            commitMessage={transcriptAnchor.message}
+            onClose={() => setTranscriptAnchor(null)}
+          />
+        )}
+      </div>
     </div>
   );
 }

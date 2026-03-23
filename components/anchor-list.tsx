@@ -14,12 +14,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AiPercentageBar } from "@/components/ai-percentage-bar";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import { AnchorDetail } from "@/components/anchor-detail";
-import { TranscriptPanel } from "@/components/transcript-panel";
 import type { TranscriptMessage } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 import { ChevronDown, ChevronLeft, ChevronRight, MessageSquareText } from "lucide-react";
 
-interface AnchorRow {
+export interface AnchorRow {
   id: string;
   commitHash: string;
   message: string | null;
@@ -44,15 +43,19 @@ interface AnchorListProps {
   pagination: Pagination;
   onPageChange: (page: number) => void;
   loading: boolean;
+  transcriptAnchorId: string | null;
+  onTranscriptToggle: (anchor: AnchorRow | null) => void;
 }
 
-export function AnchorList({ anchors, pagination, onPageChange, loading }: AnchorListProps) {
+export function AnchorList({
+  anchors,
+  pagination,
+  onPageChange,
+  loading,
+  transcriptAnchorId,
+  onTranscriptToggle,
+}: AnchorListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [transcriptAnchorId, setTranscriptAnchorId] = useState<string | null>(null);
-
-  const transcriptAnchor = transcriptAnchorId
-    ? anchors.find((a) => a.id === transcriptAnchorId)
-    : null;
 
   if (loading) {
     return (
@@ -96,7 +99,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
             {anchors.map((anchor) => (
               <React.Fragment key={anchor.id}>
                 <TableRow
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${transcriptAnchorId === anchor.id ? "bg-accent/30" : ""}`}
                   onClick={() => setExpandedId(expandedId === anchor.id ? null : anchor.id)}
                 >
                   <TableCell className="font-mono text-xs">{anchor.commitHash.slice(0, 7)}</TableCell>
@@ -119,7 +122,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setTranscriptAnchorId(transcriptAnchorId === anchor.id ? null : anchor.id);
+                          onTranscriptToggle(transcriptAnchorId === anchor.id ? null : anchor);
                         }}
                         className={`p-1 rounded transition-colors ${transcriptAnchorId === anchor.id ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                         title="View transcript"
@@ -142,6 +145,7 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
                       <AnchorDetail
                         payload={anchor.payload as Record<string, unknown>}
                         committedAt={anchor.committedAt}
+                        branch={anchor.branch}
                       />
                     </TableCell>
                   </TableRow>
@@ -178,16 +182,6 @@ export function AnchorList({ anchors, pagination, onPageChange, loading }: Ancho
             </Button>
           </div>
         </div>
-      )}
-
-      {/* Transcript side panel */}
-      {transcriptAnchor?.transcript && (
-        <TranscriptPanel
-          messages={transcriptAnchor.transcript.messages}
-          commitHash={transcriptAnchor.commitHash}
-          commitMessage={transcriptAnchor.message}
-          onClose={() => setTranscriptAnchorId(null)}
-        />
       )}
     </div>
   );
