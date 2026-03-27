@@ -1,0 +1,75 @@
+{
+  "oobo_version": "0.1.13",
+  "commit_hash": "5ed67f041b6955c515bfa04bd7a2e9ae53a39831",
+  "branch": "main",
+  "author": "Teddy <teodosp@gmail.com>",
+  "author_type": "agent",
+  "contributors": [
+    {
+      "name": "Teddy <teodosp@gmail.com>",
+      "role": "human"
+    },
+    {
+      "name": "cursor",
+      "role": "agent",
+      "model": "claude-4.6-opus-high-thinking"
+    }
+  ],
+  "committed_at": 1774594826,
+  "message": "feat: add line-level attribution support for CLI 0.1.14",
+  "files_changed": [
+    "__tests__/api/blame.test.ts",
+    "__tests__/api/line-attributions.test.ts",
+    "app/api/anchors/[commitHash]/blame/[...filePath]/route.ts",
+    "components/anchor-detail.tsx",
+    "lib/types.ts"
+  ],
+  "added": 449,
+  "deleted": 1,
+  "file_changes": [
+    {
+      "path": "__tests__/api/blame.test.ts",
+      "added": 151,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "__tests__/api/line-attributions.test.ts",
+      "added": 182,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "app/api/anchors/[commitHash]/blame/[...filePath]/route.ts",
+      "added": 49,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "components/anchor-detail.tsx",
+      "added": 47,
+      "deleted": 1,
+      "attribution": "ai",
+      "agent": "cursor"
+    },
+    {
+      "path": "lib/types.ts",
+      "added": 20,
+      "deleted": 0,
+      "attribution": "ai",
+      "agent": "cursor"
+    }
+  ],
+  "ai_added": 449,
+  "ai_deleted": 1,
+  "human_added": 0,
+  "human_deleted": 0,
+  "ai_percentage": 100.0,
+  "session_ids": [
+    "c61fc423-8610-48a3-8305-2cee81476585"
+  ],
+  "transparency_mode": "off"
+}

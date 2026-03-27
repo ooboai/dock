@@ -1,0 +1,36 @@
+{
+  "session_id": "c61fc423-8610-48a3-8305-2cee81476585",
+  "agent": "cursor",
+  "model": "claude-4.6-opus-high-thinking",
+  "link_type": "explicit",
+  "input_tokens": 9540,
+  "output_tokens": 1323,
+  "duration_secs": 33,
+  "tool_calls": 30,
+  "files_touched": [
+    "lib/types.ts",
+    "app/api/anchors/[commitHash]/blame/[...filePath]/route.ts",
+    "__tests__/api/line-attributions.test.ts",
+    "__tests__/api/blame.test.ts",
+    "components/anchor-detail.tsx"
+  ],
+  "tool_usage": {
+    "Read": 7,
+    "Shell": 6,
+    "Write": 7,
+    "Grep": 2
+  },
+  "tool_failures": 3,
+  "subagent_count": 1,
+  "bash_commands": [
+    "mkdir -p app/api/anchors/\\[commitHash\\]/blame/\\[...filePath\\]",
+    "cd ~/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd ~/dev/projects/oobo/dock && npx vitest run 2>&1",
+    "cd ~/dev/projects/oobo/dock && git status",
+    "cd ~/dev/projects/oobo/dock && git diff --stat",
+    "cd ~/dev/projects/oobo/dock && git log --oneline -5"
+  ],
+  "thinking_duration_ms": 19048,
+  "is_subagent": false,
+  "is_estimated": true
+}
