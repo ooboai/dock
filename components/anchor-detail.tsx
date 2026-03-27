@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AuthorTypeBadge } from "@/components/author-type-badge";
 import { Bot, ChevronRight } from "lucide-react";
+import type { LineAttribution } from "@/lib/types";
 
 interface AnchorPayload {
   anchor?: {
@@ -16,6 +17,7 @@ interface AnchorPayload {
       deleted: number;
       attribution: string;
       agent?: string;
+      line_attributions?: LineAttribution[];
     }>;
     sessions?: Array<{
       session_id: string;
@@ -197,6 +199,7 @@ function CollapsibleFileChanges({
   files: NonNullable<NonNullable<AnchorPayload["anchor"]>["file_changes"]>;
 }) {
   const [open, setOpen] = useState(false);
+  const filesWithLineData = files.filter((f) => f.line_attributions?.length);
   return (
     <div>
       <button
@@ -205,12 +208,22 @@ function CollapsibleFileChanges({
       >
         <ChevronRight className={`h-3 w-3 transition-transform ${open ? "rotate-90" : ""}`} />
         <span>{files.length} file{files.length !== 1 ? "s" : ""} changed</span>
+        {filesWithLineData.length > 0 && (
+          <span className="text-[10px] text-accent-foreground/70 ml-1">
+            ({filesWithLineData.length} with line data)
+          </span>
+        )}
       </button>
       {open && (
         <div className="mt-1 ml-4 space-y-px max-h-40 overflow-y-auto text-xs">
           {files.map((f, i) => (
             <div key={i} className="flex items-center justify-between py-0.5">
-              <span className="text-muted-foreground truncate font-mono flex-1 min-w-0">{f.path}</span>
+              <span className="text-muted-foreground truncate font-mono flex-1 min-w-0">
+                {f.path}
+                {f.line_attributions && f.line_attributions.length > 0 && (
+                  <LineAttributionBar attributions={f.line_attributions} totalLines={f.added} />
+                )}
+              </span>
               <span className="ml-2 shrink-0 tabular-nums">
                 <span className="text-oobo-green">+{f.added}</span>{" "}
                 <span className="text-destructive">-{f.deleted}</span>
@@ -220,6 +233,39 @@ function CollapsibleFileChanges({
         </div>
       )}
     </div>
+  );
+}
+
+function LineAttributionBar({
+  attributions,
+  totalLines,
+}: {
+  attributions: LineAttribution[];
+  totalLines: number;
+}) {
+  if (totalLines <= 0) return null;
+
+  let aiLines = 0;
+  let humanLines = 0;
+  for (const attr of attributions) {
+    const count = attr.ranges.reduce((sum, r) => sum + (r.end - r.start + 1), 0);
+    if (attr.author === "ai") aiLines += count;
+    else if (attr.author === "human") humanLines += count;
+    else { aiLines += count / 2; humanLines += count / 2; }
+  }
+
+  const aiPct = Math.round((aiLines / totalLines) * 100);
+
+  return (
+    <span className="inline-flex items-center gap-1 ml-1.5 align-middle">
+      <span className="inline-block h-1.5 w-12 rounded-full bg-muted overflow-hidden">
+        <span
+          className="block h-full rounded-full bg-accent-foreground/50"
+          style={{ width: `${aiPct}%` }}
+        />
+      </span>
+      <span className="text-[10px] text-muted-foreground tabular-nums">{aiPct}% ai</span>
+    </span>
   );
 }
 
